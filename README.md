@@ -1,45 +1,31 @@
-initialize
+### initialize
 
-terraform init
+    terraform init
 
+### preview terraform actions
 
+    terraform plan
 
-preview terraform actions
+### apply configuration with variables
 
-terraform plan
+    terraform apply -var-file terraform-dev.tfvars
 
+### destroy a single resource
 
+    terraform destroy -target aws_vpc.myapp-vpc
 
-apply configuration with variables
+### destroy everything fromtf files
 
-terraform apply -var-file terraform-dev.tfvars
+    terraform destroy
 
+### show resources and components from current state
 
+    terraform state list
 
-destroy a single resource
+### show current state of a specific resource/data
 
-terraform destroy -target aws_vpc.myapp-vpc
+    terraform state show aws_vpc.myapp-vpc    
 
+### set avail_zone as custom tf environment variable - before apply
 
-
-destroy everything fromtf files
-
-terraform destroy
-
-
-
-show resources and components from current state
-
-terraform state list
-
-
-
-show current state of a specific resource/data
-
-terraform state show aws_vpc.myapp-vpc    
-
-
-
-set avail_zone as custom tf environment variable - before apply
-
-export TF_VAR_avail_zone="eu-west-3a"
+    export TF_VAR_avail_zone="eu-west-3a"
