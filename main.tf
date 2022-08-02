@@ -35,11 +35,11 @@ resource "aws_vpc" "customer_network" {
 }
 
 data "aws_vpc" "customer_vpc" {
-  vpc_id =aws_vpc.customer_network.id
+  id =aws_vpc.customer_network.id
 }
 
 data "aws_vpc" "production_vpc" {
-  vpc_id =aws_vpc.production_network.id
+  id =aws_vpc.production_network.id
 }
 
 resource "aws_subnet" "first_production_subnet" {
@@ -61,16 +61,16 @@ resource "aws_subnet" "first_customer_subnet" {
 }
 
 resource "aws_subnet" "second_production_subnet" {
-  vpc_id = data.aws_vpc.production_vpc
+ vpc_id = data.aws_vpc.production_vpc.id
   cidr_block = "172.19.2.0/24"
-  availability_zone = "us-east-1b"
+  availability_zone = "us-east-1e"
     tags = {
     "Name" = "Second Production Subnet"
   }
 }
 
 resource "aws_subnet" "second_customer_subnet" {
-  vpc_id = data.aws_vpc.customer_vpc
+  vpc_id = data.aws_vpc.customer_vpc.id
   cidr_block = "172.20.2.0/24"
   availability_zone = "us-east-1a"
   tags = {
