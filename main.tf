@@ -1,114 +1,79 @@
 provider "aws" {
-  region = "us-east-1"
-  # secret_key = "fnzO1byx4RNqUeZ0gghcY44s3cy7fXhjRV0Kx/dS"
+  # No need to add since we have added all configuration including region,access_key and secret_access_key via aws configure list command 
+  # it is located at ~/.aws/credentials
 }
 
-variable "subnet_cidr_block" {
+variable "first_subnet_cidr_block_production" {
     description = "Subnet CIDR Block"
 }
 
-variable "vpc_cidr_block" {
-    description = "VPC CIDR Block"
+
+variable "first_subnet_cidr_block_customer" {
+    description = "Subnet CIDR Block"
 }
 
-variable "vpc_description" {
-    description = "VPC Description"
+variable "vpc_cidr_block_pro" {
+    description = "VPC CIDR Block Pro"
 }
 
-resource "aws_vpc" "test_environment_vpc" {
-  cidr_block = var.vpc_cidr_block
-   tags = {
-   Name = var.vpc_description
+variable "vpc_cidr_block_customer" {
+    description = "VPC CIDR Block Customer"
+}
+
+resource "aws_vpc" "production_network" {
+  cidr_block = var.vpc_cidr_block_pro
+  tags = {
+    "Name" = "Production VPC"
   }
 }
- 
-resource "aws_vpc" "production_environment_vpc" {
-  cidr_block = "172.119.0.0/16"
-   tags = {
-   Name = "Production VPC via Terraform"
+
+resource "aws_vpc" "customer_network" {
+  cidr_block = var.vpc_cidr_block_customer
+  tags = {
+    "Name" = "Customer VPC"
   }
 }
 
-data "aws_vpc" "to_default_vpc" {
-  default = true
-}
-
-data "aws_vpc" "test_vpc" {
-    id = aws_vpc.test_environment_vpc.id
+data "aws_vpc" "customer_vpc" {
+  vpc_id =aws_vpc.customer_network.id
 }
 
 data "aws_vpc" "production_vpc" {
-    id = aws_vpc.production_environment_vpc.id
+  vpc_id =aws_vpc.production_network.id
 }
 
-resource "aws_subnet" "subnet_one" {
-     cidr_block = var.subnet_cidr_block
-     vpc_id = aws_vpc.test_environment_vpc.id
-     availability_zone = "us-east-1a"
-     tags = {
-     Name = "Subnet_172.19.19.0/24"
-  }
-}
-
-resource "aws_subnet" "subnet_two" {
-     cidr_block = "172.19.29.0/24"
-     vpc_id = aws_vpc.test_environment_vpc.id
-     availability_zone = "us-east-1a"
+resource "aws_subnet" "first_production_subnet" {
+  vpc_id = aws_vpc.production_network.id
+  cidr_block = var.first_subnet_cidr_block_production
+  availability_zone = "us-east-1b"
     tags = {
-    Name = "Subnet_172.19.29.0/24"
+    "Name" = "First Production Subnet"
   }
 }
 
-resource "aws_subnet" "subnet_three" {
-     cidr_block = "172.19.39.0/24"
-     vpc_id = aws_vpc.test_environment_vpc.id
-     availability_zone = "us-east-1b"
-     tags = {
-     Name = "Subnet_172.19.39.0/24"
+resource "aws_subnet" "first_customer_subnet" {
+  vpc_id = aws_vpc.customer_network.id
+  cidr_block = var.first_subnet_cidr_block_customer
+  availability_zone = "us-east-1c"
+    tags = {
+    "Name" = "First Customer Subnet"
   }
 }
 
-resource "aws_subnet" "subnet_172_31_39_0_24" {
-    vpc_id = data.aws_vpc.to_default_vpc.id
-    cidr_block = "172.31.39.0/24"
-    availability_zone = "us-east-1b"
-     tags = {
-     Name = "Subnet_172.31.39.0/24"
+resource "aws_subnet" "second_production_subnet" {
+  vpc_id = data.aws_vpc.production_vpc
+  cidr_block = "172.19.2.0/24"
+  availability_zone = "us-east-1b"
+    tags = {
+    "Name" = "Second Production Subnet"
   }
 }
 
-resource "aws_subnet" "subnet_172_31_49_0_24" {
-    vpc_id = data.aws_vpc.to_default_vpc.id
-    cidr_block = "172.31.49.0/24"
-    availability_zone = "us-east-1a"
-     tags = {
-     Name = "Subnet_172.31.49.0/24"
-  }
-}
-
-resource "aws_subnet" "new_subnet_to_custom_vpc" {
-    vpc_id = data.aws_vpc.test_vpc.id
-    cidr_block = "172.19.49.0/24"
-    availability_zone = "us-east-1a"
-     tags = {
-     Name = "Subnet_172.31.49.0/24"
-  }
-}
-
-resource "aws_subnet" "subnet_172_119_0_0_24" {
-    vpc_id = data.aws_vpc.production_vpc.id
-    cidr_block = "172.119.0.0/24"
-    availability_zone = "us-east-1a"
-     tags = {
-     Name = "Subnet_172.119.0.0/24"
-  }
-}
-
-resource "aws_subnet" "subnet_172_119_1_0_24" {
-    vpc_id = data.aws_vpc.production_vpc.id
-    cidr_block = "172.119.1.0/24"
-    availability_zone = "us-east-1b"
-     tags = {
-     Name = "Subnet_172.119.1.0/24"
+resource "aws_subnet" "second_customer_subnet" {
+  vpc_id = data.aws_vpc.customer_vpc
+  cidr_block = "172.20.2.0/24"
+  availability_zone = "us-east-1a"
+  tags = {
+    "Name" = "Second Customer Subnet"
   }
 }
