@@ -82,18 +82,22 @@ resource "aws_security_group" "my_app_sg" {
    }
 }
 
-data "aws_ami" "latest_aws_linux_image" {
-  most_recent = true
-  owners = ["amazon"]
-  filter {
-    name ="name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-  filter {
-    name = "virtualization-type"
-    values =["hvm"]
-  }
+data "aws_ami" "latest-amazon-linux-image" {
+    most_recent = true
+    owners = ["amazon"]
+    filter {
+        name = "name"
+        values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+    }
+    filter {
+        name = "virtualization-type"
+        values = ["hvm"]
+    }
 }
+
+# output "ec2_public_ip" {
+#     value = aws_instance.myapp-server.public_ip
+# }
 
 resource "aws_key_pair" "ssh_key" {
   key_name = "ssh-key"
@@ -101,7 +105,7 @@ resource "aws_key_pair" "ssh_key" {
 }
 
 resource "aws_instance" "myapp-server" {
-  ami = data.aws_ami.latest_aws_linux_image.id
+  ami = data.aws_ami.latest-amazon-linux-image.id
   instance_type = var.instance_type
   availability_zone = var.availibility_zone
 
@@ -114,5 +118,18 @@ resource "aws_instance" "myapp-server" {
   tags = {
     "Name" = "${var.env_prefix}-server"
   }
+  user_data = <<-EOF
+
+    #!/bin/bash
+    sudo yum update -y && sudo yum install -y docker
+    sudo systemctl start docker
+    sudo systemctl restart docker.socket
+    sudo usermod -aG docker ec2-user
+    docker run -p 8080:80 nginx
+
+               EOF
 }
- 
+
+output "ec2_public_ip" {
+    value = aws_instance.myapp-server.public_ip
+}
